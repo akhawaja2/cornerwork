@@ -1,5 +1,6 @@
 """Cornerwork backend: JSON API for the extension/PWA plus one HTML route, /c/{token}, that serves
 the same dashboard bundle for phones (web adapter)."""
+import mimetypes
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -17,6 +18,7 @@ from app.slices.owner.router import router as owner
 from app.slices.replies.router import router as replies
 from app.slices.roster.router import router as roster
 
+mimetypes.add_type("application/javascript", ".js")  # Windows registry often maps .js to text/plain, which breaks module scripts
 EXT = Path(__file__).resolve().parents[1] / "extension-demo"
 PLACEHOLDER = "<!doctype html><html><head><title>Cornerwork</title></head><body><p>Dashboard bundle arrives in Phase 2.</p></body></html>"
 

@@ -1,17 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "Cornerwork \u2014 Gymdesk pilot",
-  "version": "0.3.0",
+  "name": "Cornerwork",
+  "version": "0.4.0",
   "minimum_chrome_version": "116",
-  "description": "Cornerwork coaching queue embedded inside Gymdesk. Sarah Demo pilot.",
+  "description": "Coaching between classes: inbox, pre-class brief and owner view for gym staff. Imports Gymdesk attendance.",
   "permissions": [
     "sidePanel",
     "activeTab",
     "scripting",
     "storage"
   ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
   "action": {
-    "default_title": "Open Cornerwork demo"
+    "default_title": "Open Cornerwork"
   },
   "side_panel": {
     "default_path": "panel.html"
@@ -19,7 +23,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "options_page": "index.html",
+  "options_page": "dashboard.html",
   "content_scripts": [
     {
       "matches": [

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cornerwork</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="dash">
+<header class="row">
+<h1>Cornerwork</h1>
+<nav aria-label="Views">
+<a href="#inbox" data-view="inbox">Inbox</a>
+<a href="#brief" data-view="brief">Brief</a>
+<a href="#owner" data-view="owner">Owner</a>
+<a href="#settings" data-view="settings">Settings</a>
+</nav>
+</header>
+<div id="stale" class="notice" hidden></div>
+<div id="view" aria-live="polite"><p class="muted">Loading…</p></div>
+<p id="status" role="status"></p>
+</main>
+<script type="module" src="dashboard.js?v=0.4.0"></script>
+</body>
+</html>

@@ -12,6 +12,11 @@ from app.models import Athlete, Booking, Flag, Gym, GymClass, Log
 router = APIRouter(prefix="/api")
 
 
+@router.get("/classes")
+def classes(session: Session = Depends(get_session), gym: Gym = Depends(current_gym)):
+    return session.exec(select(GymClass).where(GymClass.gym_id == gym.id).order_by(GymClass.name)).all()
+
+
 @router.get("/brief/{class_id}/{class_date}")
 def brief(class_id: int, class_date: date, session: Session = Depends(get_session), gym: Gym = Depends(current_gym)):
     """Pre-class brief: booked/attended athletes, open flags, last-7-day themes, one focus line.
