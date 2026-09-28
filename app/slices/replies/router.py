@@ -5,6 +5,7 @@ from sqlmodel import Session, select
 from app.db import get_session
 from app.deps import current_gym
 from app.events import record
+from app.integrations.llm import edit_distance
 from app.models import Athlete, Gym, Log, Reply, utcnow
 
 router = APIRouter(prefix="/api")
@@ -32,8 +33,10 @@ def create_reply(payload: ReplyIn, session: Session = Depends(get_session), gym:
     seconds = max(0, int((sent - log.created_at).total_seconds()))
     reply = Reply(log_id=log.id, coach_id=payload.coach_id, body=body, via="web", sent_at=sent, reply_seconds=seconds)
     session.add(reply)
-    record(session, gym.id, "reply_sent", athlete_id=athlete.id, user_id=payload.coach_id,
-           meta={"log_id": log.id, "reply_seconds": seconds, "via": "web"}, at=sent)
+    meta = {"log_id": log.id, "reply_seconds": seconds, "via": "web"}
+    if log.coach_draft:  # the pilot's key moat metric: how much the coach changed the AI draft
+        meta |= {"edit_distance": edit_distance(log.coach_draft, body), "draft_len": len(log.coach_draft)}
+    record(session, gym.id, "reply_sent", athlete_id=athlete.id, user_id=payload.coach_id, meta=meta, at=sent)
     session.commit()
     session.refresh(reply)
     return reply

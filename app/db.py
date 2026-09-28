@@ -1,5 +1,7 @@
 """Engine + session. CORNERWORK_DB selects the SQLite file; one gym row is seeded (CORNERWORK_GYM)."""
 import os
+
+import app.config  # noqa: F401  loads .env first
 from pathlib import Path
 
 from sqlmodel import Session, SQLModel, create_engine, select
