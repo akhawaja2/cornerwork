@@ -17,6 +17,7 @@ class Gym(SQLModel, table=True):
     twilio_number: Optional[str] = None
     timezone: str = "America/New_York"
     owner_email: Optional[str] = None
+    api_token: Optional[str] = Field(default=None, unique=True, index=True)  # bearer token for the extension / magic link
     created_at: datetime = Field(default_factory=utcnow)
 
 
@@ -109,8 +110,8 @@ class Reply(SQLModel, table=True):
     body: str
     via: str = "web"  # web | sms
     message_id: Optional[int] = Field(default=None, foreign_key="messages.id")
-    sent_at: datetime = Field(default_factory=utcnow)
-    reply_seconds: int = 0
+    sent_at: Optional[datetime] = None  # null for migrated replies whose time is unknown
+    reply_seconds: Optional[int] = None
 
 
 class GymClass(SQLModel, table=True):

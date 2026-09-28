@@ -1,11 +1,11 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app import db
 from app.events import record
 from app.main import app
-from app.models import Athlete, Log
+from app.models import Athlete, Gym, Log
 
 # The real captured shape of Sarah Demo's attendance row (same fixture as extension-demo/test-gymdesk.cjs).
 SNAPSHOT = {"memberId": "12672454", "memberName": "Sarah Demo", "gym": "AKLabs MMA", "observedAt": "2026-09-28T17:00:00Z",
@@ -16,7 +16,12 @@ SNAPSHOT = {"memberId": "12672454", "memberName": "Sarah Demo", "gym": "AKLabs M
 @pytest.fixture
 def client(tmp_path):
     db.init_db(tmp_path / "test.sqlite3")
-    c = TestClient(app)  # no context manager: lifespan must not re-init with the env DB
+    with Session(db.engine) as s:
+        gym = s.exec(select(Gym)).first()
+        gym.api_token = "test-token"
+        s.add(gym)
+        s.commit()
+    c = TestClient(app, headers={"Authorization": "Bearer test-token"})  # no context manager: lifespan must not re-init with the env DB
     yield c
     c.close()
 

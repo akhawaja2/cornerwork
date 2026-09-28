@@ -17,6 +17,15 @@ def test_init_db_creates_tables_and_events_record(client):
     assert client.get("/health").json() == {"ok": True}
 
 
+def test_bearer_token_required(client):
+    assert client.get("/health").status_code == 200
+    for headers in ({}, {"Authorization": "Bearer wrong"}, {"Authorization": "Basic abc"}):
+        r = client.get("/api/inbox", headers={**headers, "Authorization": headers.get("Authorization", "")})
+        assert r.status_code == 401, r.text
+    assert client.get("/c/test-token").status_code == 200
+    assert client.get("/c/wrong").status_code == 404
+
+
 def test_inbox_shows_log_then_reply(client, sarah_log):
     log = client.get("/api/inbox").json()["logs"][0]
     assert log["transcript"] == "Class was OK, Abu is excellent" and log["reply"] is None

@@ -21,7 +21,7 @@ def summary(session: Session = Depends(get_session), gym: Gym = Depends(current_
     active = {a.id for a in athletes if a.status == "active"}
     logs = [e for e in events if e.type == "log_received"]
     replies = [e for e in events if e.type == "reply_sent"]
-    secs = [e.meta.get("reply_seconds", 0) for e in replies]
+    secs = [e.meta["reply_seconds"] for e in replies if e.meta.get("reply_seconds") is not None]  # migrated replies have no time
     weekly_loggers = {e.athlete_id for e in logs if e.at >= week} & active
     last_activity = {}
     for e in events:
@@ -36,7 +36,8 @@ def summary(session: Session = Depends(get_session), gym: Gym = Depends(current_
             drift.append({"id": a.id, "name": a.name, "days_inactive": (now - last).days, "last_activity": last})
     by_coach = {}
     for e in replies:
-        by_coach.setdefault(e.user_id, []).append(e.meta.get("reply_seconds", 0))
+        if e.meta.get("reply_seconds") is not None:
+            by_coach.setdefault(e.user_id, []).append(e.meta["reply_seconds"])
     return {
         "period_days": 7, "computed_from": "events",
         "roster": len(athletes), "coached": len(active),
