@@ -1,0 +1,12 @@
+from pathlib import Path
+p=Path('build.mjs')
+s=p.read_text(encoding='utf-8-sig')
+addition="""s=slide('TECH DETAILS / APPENDIX','Two connections. One coaching product.',{notes:'Feasibility assessment, not an implementation estimate. Proposed scope: read members, class rosters and verified attendance into a common internal model; retain conversations and coaching history in Cornerwork. Do not require payment, booking or membership write-back for the initial coaching loop. Gymdesk documents Zapier Check-In triggers and member/booking/attendance searches; verify class linkage, end time, filters, delivery timing and production-scale access with a cooperating gym. A public direct Gymdesk API is not assumed. Mindbody documents APIs and roster webhooks; live developer approval and business activation are required. Production work includes stable provider IDs per gym, deduplication, missed-event reconciliation, cancellations/no-shows, time zones, credential changes, access separation and monitoring. Validate API/Zapier costs and terms before committing to pricing or a launch date. Difficulty: a narrow proof of concept is manageable; dependable multi-gym operation is a substantial integration and maintenance effort. No live integration is implemented in the current demo. Sources verified 2026-09-28: https://docs.gymdesk.com/en/help/docs/zapier and https://developers.mindbodyonline.com/WebhooksDocumentation'});
+text(s,'FEASIBLE, WITH ONGOING INTEGRATION WORK',64,238,1150,36,20,c.teal,true);
+text(s,'Build a separate connection for each platform. Both feed the same\\nmember, class and attendance records into Cornerwork.',64,296,1140,98,31,c.dark);
+text(s,'Gymdesk: start by testing its Zapier connection.\\nMindbody: use its APIs and event updates, with approved access.',64,414,1140,92,27,c.dark);
+text(s,'The hard part is reliable syncing: no-shows, duplicate updates,\\npermissions and platform changes. Neither is live in this demo.',64,542,1140,94,27,c.teal,true);
+"""
+s=s.replace("await (await PresentationFile.exportPptx(p)).save",addition+"await (await PresentationFile.exportPptx(p)).save",1)
+s=s.replace('cornerwork-demo-flow.pptx','cornerwork-demo-flow-v2.pptx').replace('explicitTotalSlideCount:9','explicitTotalSlideCount:10').replace("build+'/previews'","build+'/previews-v2'").replace("build+'/previews/'","build+'/previews-v2/'").replace("build+'/validation.json'","build+'/validation-v2.json'").replace('nine previews','ten previews')
+Path('build-v2.mjs').write_text(s,encoding='utf-8')

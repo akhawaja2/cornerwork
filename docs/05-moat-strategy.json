@@ -1,0 +1,245 @@
+{
+  "assumptions": [
+    "Coach acceptance rate of AI-drafted replies and per-log edit data will be captured from day one (events + coach_draft diff).",
+    "Athlete consent can be written to allow the athlete to carry their own logs across gyms while coach notes stay with the gym.",
+    "Founding gyms are 50-200 adult-member combat gyms in the NYC/NJ area; the founder is not selling to MK.",
+    "Cost to serve stays near $7/gym + $1.25/coached member; per-member pricing ($5) or tiered flat ($99/$249/$499) as decided.",
+    "No paid acquisition; distribution is founder-led, referral and affiliation-driven."
+  ],
+  "insights": [
+    {"id": "I1", "insight": "The platform threat is now a single $7.5B company that already ships AI (Messenger[ai], EGYM Genius) to 40,000 gyms.", "evidence": "Playlist (Mindbody/ClassPass) merged with EGYM at $7.5B, March 2026; 40k Mindbody businesses, 88k ClassPass venues (TechCrunch).", "implication": "Any moat that lives inside the owner's dashboard will be bundled away; defensibility must sit with the athlete, the coach, or the sport."},
+    {"id": "I2", "insight": "Incumbent retention tooling is attendance-based and reactive.", "evidence": "Gymdesk 'Absence' trigger fires after N days without attendance; PushPress flags declining check-ins (Gymdesk docs, PushPress).", "implication": "Signals from what athletes *say* (injury, 'stuck', frustration) arrive weeks before attendance drops; that data stream is unclaimed."},
+    {"id": "I3", "insight": "Members stay for people and accountability, not price.", "evidence": "Retention drivers: friendly staff 31%, community 20%, accountability 17% (Sogolytics n=1,069 via Athletech).", "implication": "A product that manufactures coach attention is aligned with the true retention lever; a dashboard is not."},
+    {"id": "I4", "insight": "Injury is a routine, recurring event in combat sports and drives long absences.", "evidence": "81% of BJJ practitioners injured per year, ~34 days lost per injury (PMC n=881); NCAA wrestling 9.28 injuries/1,000 exposures.", "implication": "An injury/return-to-training record is high-value, longitudinal, and something no gym software holds today."},
+    {"id": "I5", "insight": "Amateur matchmaking still runs on paper passbooks and improvised rooms.", "evidence": "'Hundreds of documents floating around'; officials work 'with no heat, air, or even a table' (The Glowing Edge). BoutFinder exists for boxing clubs only.", "implication": "A verified digital record (weight, experience, injury clearance) is a wedge into an exchange nobody owns across striking and grappling."},
+    {"id": "I6", "insight": "Exchange-type networks in sport become near-monopolies once adopted.", "evidence": "Hudl reached ~95% of US HS football because opponent film is only available on-platform; switching means 'going dark' (SGX report).", "implication": "If gyms/promoters depend on Cornerwork records to match fights or sparring, leaving carries a real competitive cost."},
+    {"id": "I7", "insight": "Combat sports distribution is concentrated in affiliations.", "evidence": "Gracie Barra ~700-1,000 schools, Nova União ~392, Alliance ~305 (BJJEE); WTBA and USA Muaythai list affiliated gyms.", "implication": "One affiliation head adopting a coaching-note standard is worth hundreds of individual gym sales and hard for a horizontal vendor to displace."},
+    {"id": "I8", "insight": "Athletes already self-log without being asked.", "evidence": "BJJ Notes reports 30k+ users; Grappling AI sells voice-note logging at $3.99/mo; many Amazon BJJ journals.", "implication": "The athlete-side habit exists; the missing piece is the coach loop and portability, not the logging behaviour."},
+    {"id": "I9", "insight": "Coach pay is the operational bottleneck and the incumbents have no concept of it.", "evidence": "At $8/member coaches earn ~$18/hr; at $10/member with AI drafts ~$35-50/hr (session model). Gym software prices per location and sells to owners only.", "implication": "A revenue share that pays coaches is counter-positioned: copying it forces incumbents to reprice and rebuild payouts."},
+    {"id": "I10", "insight": "Payments turn vertical software into infrastructure.", "evidence": "Mindbody earned ~$150 subscription + ~$100 payments per customer; fintech lifts revenue/customer 2-5x (a16z).", "implication": "Moving the coached-tier money (and coach payouts) through Cornerwork raises switching cost and revenue per gym."},
+    {"id": "I11", "insight": "SMB SaaS churn is high and front-loaded.", "evidence": "3-5% monthly churn for ACV <$10k; 70% of churn in the first 90 days (Optifai, 939 companies).", "implication": "Moats must show value inside 90 days; slow-compounding moats need a fast-value wrapper."},
+    {"id": "I12", "insight": "Coach-reviewed corrections are a labeled dataset no one else can collect.", "evidence": "Every coach edit of an AI draft is a (context, draft, correction) triple in the sport's own language; incumbents have no coach in the loop.", "implication": "A sport-specific coaching model becomes measurably better than a generic LLM with scale; the gap widens with every log."},
+    {"id": "I13", "insight": "Integration access is controlled by the incumbent.", "evidence": "Mindbody API is gated (manual approval, per-site activation, metered); Gymdesk exposes only Zapier triggers.", "implication": "Any moat that depends on incumbent APIs is revocable; the product must work with CSV and opt-in alone."},
+    {"id": "I14", "insight": "Consent and safety handling are regulatory surface area that small competitors skip.", "evidence": "TCPA statutory damages $500-1,500 per unwanted text; concussion/injury data adjacent to health law; confidential-concern routing.", "implication": "Documented consent, injury and concussion handling can become a standard that sanctioning bodies or insurers reference."}
+  ],
+  "moat_strategies": [
+    {
+      "title": "Coach-correction corpus: the sport's own coaching model",
+      "moat_type": "data moat",
+      "contrarian": false,
+      "mechanism": "Every AI draft a coach edits becomes a labeled (log, draft, correction) example. Fine-tune/retrieve on this corpus so replies, briefs and injury flags use real Muay Thai/BJJ/wrestling language and judgment. Quality gap vs generic LLM widens with volume.",
+      "research_link": ["I12", "I2", "I3"],
+      "implementation_plan": {
+        "now_30d": ["Store draft, final reply and edit distance on every coach reply", "Tag logs by discipline and technique vocabulary", "Build a 50-item eval set of real logs with coach-approved answers"],
+        "next_90d": ["Weekly eval: draft acceptance rate and edit distance by discipline", "Add retrieval over the gym's own past replies and drills", "Instrument brief accuracy: did the coach use the suggested focus?"],
+        "next_12m": ["Fine-tune a small model on 20k+ corrections", "Publish an internal 'coach agreement' score in sales material", "Gate the model behind the product; never expose raw corpus"]
+      },
+      "prerequisites": ["Consent covers use of de-identified logs for model improvement", "Coach reply flow captures edits, not just sends"],
+      "metrics": [{"name": "Draft acceptance rate (sent unedited)", "target": "40% at M3, 65% at M12"}, {"name": "Median edit distance", "target": "down 50% by M6"}, {"name": "Labeled corrections", "target": "5k by M6, 25k by M12"}, {"name": "Brief focus adopted by coach", "target": "50%+"}],
+      "risks_and_mitigations": [{"risk": "Coaches send drafts unedited out of laziness, poisoning labels", "mitigation": "Sample-audit 5% of sends; weight edits higher than accepts"}, {"risk": "Generic LLMs close the gap", "mitigation": "Moat is the corpus and retrieval, not the base model; keep gym-specific context"}, {"risk": "Privacy objection", "mitigation": "De-identify; opt-out; never train on confidential-concern channel"}],
+      "time_to_moat": "6-12 months",
+      "estimated_cost": "low",
+      "defensibility_score": 7,
+      "defensibility_justification": "Requires a coach in the loop across many gyms for months; incumbents lack the loop and startups lack the volume.",
+      "probability": 0.12
+    },
+    {
+      "title": "Drift-prediction model from language + attendance",
+      "moat_type": "data moat",
+      "contrarian": false,
+      "mechanism": "Combine log sentiment, injury flags, logging cadence and check-ins to predict cancellation 3-6 weeks out. Incumbents only see check-ins; the language signal is unique.",
+      "research_link": ["I2", "I4", "I11"],
+      "implementation_plan": {
+        "now_30d": ["Define drift label: no check-in and no log for 21 days, or cancellation", "Export attendance baselines from founding gyms", "Log sentiment and injury per entry"],
+        "next_90d": ["Train a simple logistic model on pilot data", "Show 'early warning' list to owners with the reason", "Track precision of warnings vs actual cancellations"],
+        "next_12m": ["Cross-gym model with per-gym calibration", "Coach nudge triggered automatically with context", "Report retention lift vs waitlist"]
+      },
+      "prerequisites": ["Attendance data via CSV or integration", "6+ months of paired logs and outcomes"],
+      "metrics": [{"name": "Warning precision", "target": "≥40% of flagged athletes cancel or go silent within 6 weeks"}, {"name": "Lead time vs absence trigger", "target": "≥14 days earlier"}, {"name": "Coach action rate on warnings", "target": "≥60%"}],
+      "risks_and_mitigations": [{"risk": "Too few cancellations to train on early", "mitigation": "Use silence (no log/check-in) as proxy label"}, {"risk": "Incumbents add sentiment via their own messaging", "mitigation": "They lack the coach reply loop that generates the language"}, {"risk": "False alarms erode trust", "mitigation": "Show reasons; let coaches dismiss with feedback"}],
+      "time_to_moat": "12-24 months",
+      "estimated_cost": "medium",
+      "defensibility_score": 5,
+      "defensibility_justification": "Valuable and unique input, but the model itself is simple; defensibility comes from I1's data, not the algorithm.",
+      "probability": 0.08
+    },
+    {
+      "title": "Cross-gym sparring and matchmaking exchange",
+      "moat_type": "network effects",
+      "contrarian": false,
+      "mechanism": "Verified athlete records (weight, experience, injury clearance, recent activity) let gyms find sparring partners and promoters match amateur bouts. Once used, leaving means losing access to opponents (Hudl dynamic).",
+      "research_link": ["I5", "I6", "I4"],
+      "implementation_plan": {
+        "now_30d": ["Add weight, experience and competition fields to the athlete model", "Ask founding coaches how they find sparring and opponents today"],
+        "next_90d": ["Manual concierge: match 5 sparring pairs across founding gyms by hand", "Offer one local promoter a verified fight-readiness sheet"],
+        "next_12m": ["Regional density target: 25 gyms in NYC/NJ", "Self-serve sparring board; promoter view of eligible athletes", "Pilot digital passbook with one sanctioning body"]
+      },
+      "prerequisites": ["Athlete consent for cross-gym visibility", "Regional density of 20+ gyms", "Relationships with 2+ promoters"],
+      "metrics": [{"name": "Cross-gym matches made", "target": "10/month by M9"}, {"name": "Gyms in one metro", "target": "25 by M12"}, {"name": "Promoter requests", "target": "1 promoter using it monthly by M12"}],
+      "risks_and_mitigations": [{"risk": "Cold start: no value until density", "mitigation": "Concierge matching by hand; founder's own network"}, {"risk": "Smoothcomp/BoutFinder extend into training data", "mitigation": "They lack the daily log; partner or integrate rather than fight"}, {"risk": "Gym owners fear poaching", "mitigation": "Gym-to-gym visibility only with both owners' consent; athlete identity gated"}],
+      "time_to_moat": "24+ months",
+      "estimated_cost": "high",
+      "defensibility_score": 9,
+      "defensibility_justification": "True two-sided network with a competitive cost to leaving; the strongest moat available but slowest and hardest.",
+      "probability": 0.05
+    },
+    {
+      "title": "Coach-as-node: the coach keeps their athletes across gyms",
+      "moat_type": "network effects",
+      "contrarian": true,
+      "mechanism": "Contrary to 'the gym owns the history', make the coach the account holder for their own notes and drills. Coaches teach at multiple gyms and change jobs; their Cornerwork profile travels, and every gym they join becomes a customer.",
+      "research_link": ["I9", "I3", "I8"],
+      "implementation_plan": {
+        "now_30d": ["Model coach as a first-class user with gym memberships", "Let coach export their drills and reply templates"],
+        "next_90d": ["Coach profile shows athletes coached, reply stats, drills", "Coach can invite a second gym they teach at"],
+        "next_12m": ["Coach-led onboarding: 'bring Cornerwork to your gym' with revenue share", "Independent coach plan ($29-49/mo) as a wedge"]
+      },
+      "prerequisites": ["Clear split: coach owns drills/templates, gym owns athlete relationship, athlete owns logs", "Owner acceptance of coach portability"],
+      "metrics": [{"name": "Gyms acquired via coach referral", "target": "30% of new gyms by M12"}, {"name": "Coaches active at 2+ gyms", "target": "10% of coaches"}, {"name": "Coach 90-day retention", "target": "≥80%"}],
+      "risks_and_mitigations": [{"risk": "Owners see it as enabling poaching", "mitigation": "Athlete relationship and roster stay with the gym; coach keeps only their own content"}, {"risk": "Conflicts with 'gym owns history' pitch", "mitigation": "Reframe as three owners: gym, coach, athlete"}, {"risk": "Coaches don't self-organize", "mitigation": "Pay the referral share visibly"}],
+      "time_to_moat": "12-24 months",
+      "estimated_cost": "low",
+      "defensibility_score": 6,
+      "defensibility_justification": "Incumbents sell to owners and cannot make the coach the customer without channel conflict.",
+      "probability": 0.06
+    },
+    {
+      "title": "Athlete training passport",
+      "moat_type": "switching costs",
+      "contrarian": false,
+      "mechanism": "The athlete owns a portable record (logs, injuries, what they worked on, coach notes they're allowed to keep). It follows them to new gyms, on trips, and to competition. Both athlete and gym lose something if either leaves Cornerwork.",
+      "research_link": ["I8", "I4", "I1", "I5"],
+      "implementation_plan": {
+        "now_30d": ["Schema: athlete_id independent of gym_id; ownership flags on every record", "Consent language names portability"],
+        "next_90d": ["Magic-link progress page with export", "'Take it with you' flow when an athlete leaves a gym"],
+        "next_12m": ["Multi-gym athlete view (cross-training)", "Verified fight-readiness section (weight, experience, injury clearance)", "Import from BJJ Notes / journals"]
+      },
+      "prerequisites": ["Consent and data-ownership split agreed with founding gyms", "Magic-link auth"],
+      "metrics": [{"name": "Athletes who view their passport monthly", "target": "≥50%"}, {"name": "Athletes bringing passport to a new gym", "target": "20 by M12"}, {"name": "New gyms acquired via athlete", "target": "5 by M12"}],
+      "risks_and_mitigations": [{"risk": "Owners object to portability", "mitigation": "Coach notes stay with the gym; only the athlete's own logs travel"}, {"risk": "Athletes don't care until they move", "mitigation": "Make the weekly recap the passport's front page"}, {"risk": "Incumbents add member portals", "mitigation": "Theirs is gym-scoped by design; cross-gym is the point"}],
+      "time_to_moat": "6-12 months",
+      "estimated_cost": "medium",
+      "defensibility_score": 8,
+      "defensibility_justification": "Structurally misaligned with incumbents' gym-owns-member model; compounds with every log and every gym change.",
+      "probability": 0.13
+    },
+    {
+      "title": "Curriculum embedding: drills + progression rubric become the gym's operating manual",
+      "moat_type": "switching costs",
+      "contrarian": false,
+      "mechanism": "Each gym's drill library, class themes and level rubric live in Cornerwork and are referenced in every reply and brief. Over a year it becomes the written curriculum the gym never had; leaving means losing the manual.",
+      "research_link": ["I3", "I12", "I7"],
+      "implementation_plan": {
+        "now_30d": ["Drill library with tags per gym", "Replies link drills by default"],
+        "next_90d": ["Class-theme history per class", "Level rubric (not belts): skills checklist per discipline"],
+        "next_12m": ["Curriculum export as the gym's coach handbook", "Affiliation-level curriculum templates"]
+      },
+      "prerequisites": ["Coaches willing to record 20-50 drills", "Rubric co-designed with a head coach"],
+      "metrics": [{"name": "Drills per gym", "target": "≥40 by M6"}, {"name": "Replies linking a drill", "target": "≥60%"}, {"name": "Rubric checkpoints logged per athlete", "target": "≥1/month"}],
+      "risks_and_mitigations": [{"risk": "Coaches won't build the library", "mitigation": "Seed from public sources per discipline; AI suggests tags"}, {"risk": "Feels like admin", "mitigation": "Capture drills from voice notes automatically"}, {"risk": "Easy to export and copy", "mitigation": "Value is in the links to athlete history, not the list"}],
+      "time_to_moat": "6-12 months",
+      "estimated_cost": "low",
+      "defensibility_score": 5,
+      "defensibility_justification": "Real but modest switching cost; strengthens the passport and corpus more than it stands alone.",
+      "probability": 0.09
+    },
+    {
+      "title": "Affiliation standard: one network head adopts the coaching-note format",
+      "moat_type": "distribution moat",
+      "contrarian": false,
+      "mechanism": "Sign one affiliation (WTBA, a BJJ association, a regional Muay Thai federation) as a design partner. Their coaching-note and rubric format ships as a template; member schools adopt it as 'how we do it'.",
+      "research_link": ["I7", "I11", "I3"],
+      "implementation_plan": {
+        "now_30d": ["List 10 affiliations with NYC/NJ presence and a reachable head", "Use founder credibility to book 3 conversations"],
+        "next_90d": ["Design-partner terms: free for HQ, founding rate for schools, co-branded template", "Pilot at 2 affiliate schools"],
+        "next_12m": ["Affiliation-wide rollout with HQ dashboard", "Second affiliation in another discipline"]
+      },
+      "prerequisites": ["Founder access to an affiliation head", "Multi-gym tenancy and HQ roll-up"],
+      "metrics": [{"name": "Affiliations signed", "target": "1 by M6, 2 by M12"}, {"name": "Schools onboarded via affiliation", "target": "10 by M12"}, {"name": "CAC per affiliation gym", "target": "<$150"}],
+      "risks_and_mitigations": [{"risk": "Affiliations are political and slow", "mitigation": "Start with a smaller regional federation"}, {"risk": "HQ wants a cut", "mitigation": "Offer HQ visibility, not cash; revenue share only on referred schools"}, {"risk": "Renzo network overlaps MK", "mitigation": "Avoid Renzo affiliates per founder's constraint"}],
+      "time_to_moat": "6-12 months",
+      "estimated_cost": "low",
+      "defensibility_score": 7,
+      "defensibility_justification": "A horizontal vendor cannot easily become an affiliation's coaching standard; the relationship is founder-specific.",
+      "probability": 0.10
+    },
+    {
+      "title": "Insurer/sanctioning-body pull: documented injury tracking as a requirement",
+      "moat_type": "distribution moat",
+      "contrarian": true,
+      "mechanism": "Instead of selling gyms, sell the injury/concussion/consent record to the parties that bear the risk: sanctioning bodies (fighter clearance) and gym liability insurers (premium credit). Gyms adopt because the requirement or discount pulls them in.",
+      "research_link": ["I14", "I4", "I5"],
+      "implementation_plan": {
+        "now_30d": ["Structure injury and concussion records to a documented standard", "Identify 2 sanctioning bodies and 2 martial-arts insurers"],
+        "next_90d": ["Conversation with one sanctioning body about digital passbook fields", "Draft a one-page 'documented injury tracking' spec"],
+        "next_12m": ["Pilot: one promoter accepts Cornerwork clearance sheet", "One insurer references documented tracking in underwriting"]
+      },
+      "prerequisites": ["Legal review of health-adjacent data handling", "Credible injury data from 10+ gyms"],
+      "metrics": [{"name": "Sanctioning-body conversations", "target": "2 by M6"}, {"name": "Promoters accepting the sheet", "target": "1 by M12"}, {"name": "Gyms citing insurer/sanctioning as reason to buy", "target": "≥3 by M12"}],
+      "risks_and_mitigations": [{"risk": "Regulatory bodies move in years", "mitigation": "Treat as long option; do not depend on it"}, {"risk": "Health-data liability", "mitigation": "Minimal fields; athlete consent; counsel review"}, {"risk": "Insurers uninterested", "mitigation": "Start with promoters/sanctioning where pain is immediate"}],
+      "time_to_moat": "24+ months",
+      "estimated_cost": "medium",
+      "defensibility_score": 8,
+      "defensibility_justification": "If a body references the standard, it is regulatory-grade lock-in; probability low because bodies are slow.",
+      "probability": 0.05
+    },
+    {
+      "title": "Coaching layer inside incumbent marketplaces (partner with the threat)",
+      "moat_type": "ecosystem/platform",
+      "contrarian": true,
+      "mechanism": "List Cornerwork as the coaching add-on in Gymdesk/PushPress/Mindbody marketplaces with coach payouts included. Incumbents get an AI-coaching story without building payroll; Cornerwork gets distribution and becomes the piece they'd rather buy than rebuild.",
+      "research_link": ["I1", "I9", "I10", "I13"],
+      "implementation_plan": {
+        "now_30d": ["Ship CSV + opt-in path that needs no integration", "Map each incumbent's partner program"],
+        "next_90d": ["Gymdesk Zapier template published", "Apply to PushPress partner listing"],
+        "next_12m": ["Mindbody developer approval and marketplace listing", "Stripe Connect coach payouts live", "Co-marketing case study with one incumbent"]
+      },
+      "prerequisites": ["Never single-sourced on one incumbent API", "Coach payouts working"],
+      "metrics": [{"name": "Gyms acquired via marketplace", "target": "20% by M12"}, {"name": "Integrations live", "target": "2 by M9"}, {"name": "Incumbent co-marketing", "target": "1 by M12"}],
+      "risks_and_mitigations": [{"risk": "Incumbent copies after seeing traction", "mitigation": "Payouts + passport + corpus are the parts they can't lift"}, {"risk": "API access revoked", "mitigation": "CSV and opt-in path always works"}, {"risk": "Marketplace fees", "mitigation": "Per-member pricing absorbs it"}],
+      "time_to_moat": "12-24 months",
+      "estimated_cost": "medium",
+      "defensibility_score": 5,
+      "defensibility_justification": "Distribution, not defense; valuable because it positions Cornerwork as acquire-not-rebuild.",
+      "probability": 0.07
+    },
+    {
+      "title": "Coached-athlete community: cross-gym open mats and visible progression",
+      "moat_type": "community",
+      "contrarian": false,
+      "mechanism": "Coached members get a visible progression record and invitations to cross-gym open mats and sparring nights run through Cornerwork. Belonging to the network becomes a reason to be a coached member anywhere.",
+      "research_link": ["I3", "I8", "I6"],
+      "implementation_plan": {
+        "now_30d": ["Add 'coached' status to athlete profile", "Founder hosts one cross-gym open mat with founding gyms"],
+        "next_90d": ["Monthly open mat calendar; RSVP by text", "Progression badges tied to rubric, not belts"],
+        "next_12m": ["Regional coached-athlete events; sponsor tie-ins", "Athlete referral: bring a friend from another gym"]
+      },
+      "prerequisites": ["3+ gyms in one metro", "Owner buy-in for cross-gym events"],
+      "metrics": [{"name": "Open-mat attendance", "target": "30/month by M9"}, {"name": "Athlete-referred sign-ups", "target": "10% of new coached members"}, {"name": "Coached-member churn vs standard", "target": "50% lower"}],
+      "risks_and_mitigations": [{"risk": "Owners fear members leaving for other gyms", "mitigation": "Events hosted rotating; owners co-host"}, {"risk": "Founder time", "mitigation": "Delegate to a host coach per event"}, {"risk": "Community fizzles", "mitigation": "Tie to competition calendar"}],
+      "time_to_moat": "12-24 months",
+      "estimated_cost": "medium",
+      "defensibility_score": 6,
+      "defensibility_justification": "Community is real defense in relationship businesses but depends on founder presence early.",
+      "probability": 0.06
+    }
+  ],
+  "recommended_portfolio": [
+    {"strategy_title": "Coach-correction corpus: the sport's own coaching model", "rationale": "Starts on day one at near-zero cost, compounds with every reply, and is the one asset a $7.5B platform cannot buy or bundle because it has no coach in the loop."},
+    {"strategy_title": "Athlete training passport", "rationale": "Structurally opposed to the incumbents' gym-owns-member model; turns every gym change into distribution and gives athletes a reason to keep the product independent of any gym."},
+    {"strategy_title": "Affiliation standard: one network head adopts the coaching-note format", "rationale": "Only founder-specific distribution lever that reaches hundreds of gyms without paid acquisition, and it feeds the corpus and passport with volume."}
+  ],
+  "kill_criteria": [
+    {"strategy_title": "Coach-correction corpus: the sport's own coaching model", "criteria": ["Draft acceptance rate below 25% at month 3 with no upward trend across two consecutive months", "Fewer than 1,500 labeled corrections by month 6 across all gyms", "Blind eval shows no measurable gain over the base model at 5k corrections"]},
+    {"strategy_title": "Athlete training passport", "criteria": ["Fewer than 30% of coached athletes open their progress page in any month by month 4", "Zero athletes carry the passport to a new gym by month 9", "Two of three founding owners refuse portability terms after seeing the consent split"]},
+    {"strategy_title": "Affiliation standard: one network head adopts the coaching-note format", "criteria": ["No affiliation head agrees to a pilot by month 6 after 5+ conversations", "Affiliate schools onboard at a CAC above $400 or churn above 5%/month", "HQ demands cash terms that push gym-level margin below 50%"]}
+  ],
+  "sequencing": [
+    {"month": "M1", "focus": "Instrument corrections and ownership flags; consent language with portability; list affiliations and book 3 calls", "dependencies": ["Pilot live at 1-3 gyms", "Capital One policy cleared"]},
+    {"month": "M2", "focus": "Eval set of 50 real logs; drill library seeded; first affiliation conversation; weekly recap as passport front page", "dependencies": ["M1 instrumentation"]},
+    {"month": "M3", "focus": "Report draft acceptance and edit distance; magic-link progress page with export; affiliation design-partner terms drafted", "dependencies": ["Corpus ≥500 corrections", "Magic-link auth"]},
+    {"month": "M4", "focus": "Retrieval over gym's own replies; 'take it with you' flow; pilot at 2 affiliate schools", "dependencies": ["Affiliation agreement", "Multi-gym tenancy"]},
+    {"month": "M5", "focus": "Blind eval vs base model; multi-gym athlete view; concierge cross-gym sparring matches (option on exchange)", "dependencies": ["≥3 gyms in metro", "Athlete consent for cross-gym visibility"]},
+    {"month": "M6", "focus": "Go/no-go on each of the three against kill criteria; decide whether to open Stripe Connect payouts and the exchange track", "dependencies": ["M3-M5 metrics", "Founding-gym renewals"]}
+  ]
+}
