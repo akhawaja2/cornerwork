@@ -6,7 +6,9 @@ from app.db import get_session
 from app.deps import current_gym
 from app.events import record
 from app.integrations.llm import edit_distance
+from app.integrations.twilio_client import send_sms
 from app.models import Athlete, Gym, Log, Reply, utcnow
+from app.slices.inbound.router import coach_name
 
 router = APIRouter(prefix="/api")
 
@@ -32,6 +34,8 @@ def create_reply(payload: ReplyIn, session: Session = Depends(get_session), gym:
     sent = utcnow()
     seconds = max(0, int((sent - log.created_at).total_seconds()))
     reply = Reply(log_id=log.id, coach_id=payload.coach_id, body=body, via="web", sent_at=sent, reply_seconds=seconds)
+    if athlete.phone and athlete.status == "active":  # consent gate: stopped/pending athletes get no text
+        reply.message_id = send_sms(session, gym, athlete, f"{coach_name()}: {body}").id
     session.add(reply)
     meta = {"log_id": log.id, "reply_seconds": seconds, "via": "web"}
     if log.coach_draft:  # the pilot's key moat metric: how much the coach changed the AI draft

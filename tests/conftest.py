@@ -1,5 +1,11 @@
-import pytest
-from fastapi.testclient import TestClient
+import os
+
+os.environ["DEMO_MODE"] = "1"  # tests never call Anthropic, OpenAI or Twilio, whatever the shell has set
+for _key in ("TWILIO_AUTH_TOKEN", "PUBLIC_URL"):
+    os.environ.pop(_key, None)
+
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 from sqlmodel import Session, select
 
 from app import db
