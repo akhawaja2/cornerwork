@@ -1,6 +1,6 @@
 # Cornerwork local MVP demo
 
-A working, offline demonstration of the coaching loop in `03-mvp-spec.md` and `04-demo-and-pilot.md`. This is a local demo, not a live SMS pilot. It uses fictional adult athletes and sends no real messages.
+A working, offline demonstration of the coaching loop in `docs/03-mvp-spec.md` and `docs/04-demo-and-pilot.md`. This is a local demo, not a live SMS pilot. It uses fictional adult athletes and sends no real messages.
 
 ## Start
 
