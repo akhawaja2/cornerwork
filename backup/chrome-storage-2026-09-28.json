@@ -1,0 +1,20 @@
+{
+ "_note": "chrome.storage.local dump from the installed extension service worker, 2026-09-28. coachingState was absent; the Thanks! reply lives in the options page localStorage key cornerwork-extension-fictional-v1 (see chrome-localstorage-2026-09-28.json).",
+ "gymdeskError": "",
+ "gymdeskSnapshot": {
+  "gym": "AKLabs MMA",
+  "memberId": "12672454",
+  "memberName": "Sarah Demo",
+  "observedAt": "2026-09-28T19:22:35.893Z",
+  "records": [
+   {
+    "date": "09/28/2026",
+    "duration": "1h",
+    "id": "62252846",
+    "sessionId": "1832536",
+    "title": "Cornerwork Test — Boxing",
+    "when": "Sep 28, 2026 7:00 AM"
+   }
+  ]
+ }
+}

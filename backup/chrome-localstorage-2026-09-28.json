@@ -1,0 +1,5 @@
+{
+ "_note": "localStorage key cornerwork-extension-fictional-v1 from the installed extension options page, 2026-09-28. Holds the verified pilot log and the coach reply. The state shape has no reply timestamp; only the log 'at' is known.",
+ "_key": "cornerwork-extension-fictional-v1",
+ "value": {"provider":"gymdeskLive","sites":{"gymdesk":{"attended":false,"logs":[],"ping":false},"gymdeskLive":{"attended":true,"currentAttendance":{"date":"09/28/2026","duration":"1h","end":1790596800000,"id":"62252846","sessionId":"1832536","start":1790593200000,"title":"Cornerwork Test — Boxing","when":"Sep 28, 2026 7:00 AM"},"logs":[{"at":"2026-09-28T19:24:07.703Z","attendanceId":"62252846","attendanceTitle":"Cornerwork Test — Boxing","audio":"","body":"Class was OK, Abu is excellent","id":1,"reply":"Thanks!"}],"ping":true,"pingIds":["62252846"],"source":{"gym":"AKLabs MMA","memberId":"12672454","memberName":"Sarah Demo","observedAt":"2026-09-28T19:22:35.893Z","records":[{"date":"09/28/2026","duration":"1h","id":"62252846","sessionId":"1832536","title":"Cornerwork Test — Boxing","when":"Sep 28, 2026 7:00 AM"}]}},"mindbody":{"attended":false,"logs":[],"ping":false}}}
+}
