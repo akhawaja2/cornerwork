@@ -36,6 +36,15 @@ for r in (logs, replies, brief, roster, owner, inbound):
 app.mount("/static", StaticFiles(directory=EXT), name="static")  # ponytail: whole extension folder; trim to a bundle dir if it grows
 
 
+@app.middleware("http")
+async def revalidate_static(request, call_next):
+    """Browsers must revalidate the dashboard bundle on every load; otherwise a redeploy ships stale modules."""
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 @app.get("/health")
 def health():
     return {"ok": True}
