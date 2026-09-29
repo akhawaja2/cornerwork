@@ -41,6 +41,9 @@ def test_inbox_scoped_to_gymdesk_member(client, sarah_log):
     assert scoped["athlete"]["name"] == "Sarah Demo" and len(scoped["logs"]) == 1
     unknown = client.get("/api/inbox?member=999").json()
     assert unknown["athlete"] is None and unknown["logs"] == []
+    by_id = client.get(f"/api/inbox?athlete={sarah_log['athlete_id']}").json()
+    assert by_id["athlete"]["name"] == "Sarah Demo" and len(by_id["logs"]) == 1
+    assert client.get("/api/inbox?athlete=999").json()["athlete"] is None
     assert "athlete" not in client.get("/api/inbox").json()
 
 

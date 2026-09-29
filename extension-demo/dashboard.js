@@ -24,8 +24,9 @@ const hashParams = () => new URLSearchParams((location.hash.split('?')[1] || '')
 
 async function fetchView(view) {
   if (view === 'inbox') {
-    const member = hashParams().get('member');  // Gymdesk member id when opened from a member page
-    return adapter.api('GET', '/api/inbox' + (member ? '?member=' + encodeURIComponent(member) : ''));
+    const p = hashParams();  // #inbox?athlete=<id> (click-in) or #inbox?member=<gymdesk id>
+    const scope = p.get('athlete') ? '?athlete=' + encodeURIComponent(p.get('athlete')) : p.get('member') ? '?member=' + encodeURIComponent(p.get('member')) : '';
+    return adapter.api('GET', '/api/inbox' + scope);
   }
   if (view === 'owner') return adapter.api('GET', '/api/owner/summary');
   const classes = await adapter.api('GET', '/api/classes');

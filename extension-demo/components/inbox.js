@@ -31,7 +31,7 @@ function card(l) {
     ? `<p><strong>Replied</strong> <small>${l.reply.sent_at ? when(l.reply.sent_at) : '(time unknown)'}</small></p><p class="message">${esc(l.reply.body)}</p>`
     : `<form data-log="${l.id}"><label for="reply-${l.id}">Your reply${l.coach_draft ? ' (AI draft, edit freely)' : ''}</label>` +
       `<textarea id="reply-${l.id}" name="body" maxlength="1600" required>${esc(l.coach_draft || '')}</textarea><button>Send reply</button></form>`;
-  return `<article class="card"><div class="row"><h3>${esc(l.athlete.name)}</h3><small>${esc(l.athlete.status)} · ${when(l.created_at)}</small></div>` +
+  return `<article class="card"><div class="row"><h3><a href="#inbox?athlete=${l.athlete.id}" title="Only this athlete">${esc(l.athlete.name)}</a></h3><small>${esc(l.athlete.status)} · ${when(l.created_at)}</small></div>` +
     (l.summary && l.summary !== l.transcript ? `<p><strong>${esc(l.summary)}</strong></p>` : '') +
     `<p class="message">${esc(l.transcript)}</p>${flags ? `<p>${flags}</p>` : ''}${reply}</article>`;
 }

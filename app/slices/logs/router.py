@@ -9,16 +9,17 @@ router = APIRouter(prefix="/api")
 
 
 @router.get("/inbox")
-def inbox(member: str | None = Query(default=None, pattern=r"^\d+$"),
+def inbox(member: str | None = Query(default=None, pattern=r"^\d+$"), athlete: int | None = Query(default=None, gt=0),
           session: Session = Depends(get_session), gym: Gym = Depends(current_gym)):
     """Logs newest-first with athlete and reply (null when unanswered).
-    ?member=<gymdesk member id> scopes to one athlete and adds "athlete" (null when that member is not in Cornerwork)."""
+    ?athlete=<id> or ?member=<gymdesk member id> scopes to one athlete and adds "athlete" (null when unknown)."""
     query = select(Log, Athlete).join(Athlete).where(Athlete.gym_id == gym.id)
     scoped = {}
-    if member:
-        athlete = session.exec(select(Athlete).where(Athlete.gym_id == gym.id, Athlete.gymdesk_member_id == member)).first()
-        scoped = {"athlete": {"id": athlete.id, "name": athlete.name, "status": athlete.status} if athlete else None}
-        query = query.where(Athlete.id == (athlete.id if athlete else -1))
+    if member or athlete:
+        who = session.exec(select(Athlete).where(Athlete.gym_id == gym.id, Athlete.gymdesk_member_id == member)).first() if member \
+            else session.exec(select(Athlete).where(Athlete.gym_id == gym.id, Athlete.id == athlete)).first()
+        scoped = {"athlete": {"id": who.id, "name": who.name, "status": who.status} if who else None}
+        query = query.where(Athlete.id == (who.id if who else -1))
     rows = session.exec(query.order_by(Log.created_at.desc(), Log.id.desc())).all()
     replies = {r.log_id: r for r in session.exec(select(Reply).where(Reply.log_id.in_([log.id for log, _ in rows]))).all()} if rows else {}
     return {

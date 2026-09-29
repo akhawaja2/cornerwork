@@ -1,7 +1,7 @@
 // Content script on https://app.gymdesk.com/manager/*.
 // 1. Member pages (/manager/members/<section>/id/<memberId>): adds a "Cornerwork" tab to Gymdesk's own sub-nav
-//    (Profile · Messaging · Attendance · ...). Clicking it swaps the page section for the dashboard bundle, scoped
-//    to that member (#inbox?member=<id>). Gymdesk's other tabs keep working as normal links.
+//    (Profile · Messaging · Attendance · ...). Clicking it swaps the page section for the dashboard bundle (all
+//    athletes; athlete names inside narrow the view). Gymdesk's other tabs keep working as normal links.
 // 2. Every manager page: a floating Cornerwork button that opens the same bundle in a small panel.
 // Reads nothing from Gymdesk here and never modifies Gymdesk records.
 (() => {
@@ -22,7 +22,7 @@ if(subnav){
  section.append(frame);main.append(section);
  const others=[...main.children].filter(c=>c!==section&&!c.classList.contains('subnav'));
  function show(on){
-  if(on&&!frame.src)frame.src=dashboard+'#'+view+'?member='+member;
+  if(on&&!frame.src)frame.src=dashboard+'#'+view; // everyone; click an athlete name inside to narrow
   others.forEach(c=>c.style.display=on?'none':'');section.hidden=!on;
   subnav.querySelectorAll('a').forEach(a=>a.classList.toggle('selected',on?a===tab:a.getAttribute('href')?.includes('/'+location.pathname.split('/')[3]+'/')));
  }
@@ -40,7 +40,7 @@ const section=document.createElement('section');section.hidden=true;section.setA
 const frame=document.createElement('iframe');frame.title='Cornerwork coaching';
 section.append(frame);shadow.append(style,toggle,section);document.body.append(host);
 function open(value){
- if(value&&!frame.src)frame.src=dashboard+'#'+view+(member?'?member='+member:''); // load the bundle on first open only
+ if(value&&!frame.src)frame.src=dashboard+'#'+view; // load the bundle on first open only
  section.hidden=!value;toggle.setAttribute('aria-expanded',String(value));toggle.textContent=value?'Close Cornerwork':'Cornerwork';
 }
 toggle.onclick=()=>open(section.hidden);
