@@ -17,6 +17,7 @@ export function renderBrief(root, { classes, brief }, ctx) {
       `<article class="card"><div class="row"><h3>${esc(brief.class.name)} · ${esc(brief.date)}${brief.class.start_time ? ' · ' + esc(brief.class.start_time) : ''}</h3>${label}</div>` +
       `<p><strong>Focus:</strong> ${esc(brief.focus)} <small>(${esc(brief.generator)})</small></p>` +
       (brief.themes.length ? '<p>' + brief.themes.map(t => `<span class="tag">${esc(t.name)} ×${t.count}</span>`).join(' ') + '</p>' : '') +
+      ((brief.notes || []).length ? '<ul>' + brief.notes.map(n => `<li><strong>${esc(n.athlete)}:</strong> ${esc(n.note)}</li>`).join('') + '</ul>' : '') +
       athletes + '</article>');
   root.querySelector('#cls').onchange = e => { ctx.brief.classId = Number(e.target.value); ctx.refresh(); };
   root.querySelector('#date').onchange = e => { ctx.brief.date = e.target.value; ctx.refresh(); };
