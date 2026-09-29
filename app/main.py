@@ -13,6 +13,7 @@ from sqlmodel import Session
 from app.db import get_session, init_db
 from app.deps import gym_for_token
 from app.slices.brief.router import router as brief
+from app.slices.drills.router import router as drills
 from app.slices.inbound.router import router as inbound
 from app.slices.logs.router import router as logs
 from app.slices.owner.router import router as owner
@@ -31,7 +32,7 @@ async def lifespan(app):
 
 
 app = FastAPI(title="Cornerwork backend", lifespan=lifespan, docs_url=None, redoc_url=None)
-for r in (logs, replies, brief, roster, owner, inbound):
+for r in (logs, replies, brief, roster, owner, inbound, drills):
     app.include_router(r)
 app.mount("/static", StaticFiles(directory=EXT), name="static")  # ponytail: whole extension folder; trim to a bundle dir if it grows
 

@@ -97,7 +97,7 @@ def main():
             box.type("Nice cross! Skip shin checks Tuesday, ice it tonight, and tell me how it feels before class.", delay=28)
             page.wait_for_timeout(600)
             page.locator("form[data-log] button").first.click()
-            page.wait_for_selector("text=Reply saved.")
+            page.wait_for_selector("text=Reply sent.")
             page.wait_for_timeout(3000)
 
             page.goto(url + "#brief")
@@ -109,7 +109,7 @@ def main():
             page.wait_for_timeout(4500)
 
             page.goto(url + "#owner")
-            page.wait_for_selector(".tile")
+            page.wait_for_selector(".stat")
             caption("Owner view: coached athletes, logging rate, reply times. Every number comes from the events table.")
             page.wait_for_timeout(4000)
             caption("Cornerwork · coaching between classes · extension tab, Gymdesk side panel, or this link on a phone.")

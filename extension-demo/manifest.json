@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Cornerwork",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "minimum_chrome_version": "116",
   "description": "Coaching between classes: inbox, pre-class brief and owner view for gym staff. Imports Gymdesk attendance.",
   "permissions": [

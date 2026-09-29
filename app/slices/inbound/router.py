@@ -111,7 +111,8 @@ async def inbound_sms(request: Request, session: Session = Depends(get_session))
     if not transcript.strip():
         return reply(session, gym, athlete, "Send a short text or a voice note about class and your coach will reply.")
     log = create_log(session, gym, athlete, transcript, message_id=inbound.id, source=source)
-    ack = f"Got it. {coach_name()} will reply."
+    ack = f"Logged: {log.summary} I've let {coach_name()} know." if log.summary and log.summary != log.transcript \
+        else f"Got it. {coach_name()} will reply."
     if log.concussion_flag:
         ack += " You mentioned a possible head knock: please get checked by a medical professional before training again. This service cannot assess injuries."
     elif log.injury:

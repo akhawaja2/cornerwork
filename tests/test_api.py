@@ -87,6 +87,36 @@ def test_import_roster_upserts_and_records_bookings(client):
     assert brief["athletes"][0]["name"] == "Alex Demo" and brief["sources"] == ["csv"]
 
 
+def test_athletes_drills_and_checkin(client, sarah_log):
+    athletes = client.get("/api/athletes").json()
+    assert athletes[0]["name"] == "Sarah Demo" and athletes[0]["logs_7d"] == 1 and athletes[0]["phone_last4"] is None
+    assert client.get("/api/drills").json() == []
+    drill = client.post("/api/drills", json={"title": "Jab + pivot exit", "url": "https://example.test/jab", "tags": ["Jab", " footwork "]})
+    assert drill.status_code == 201 and drill.json()["tags"] == ["jab", "footwork"]
+    assert client.post("/api/drills", json={"title": "x", "url": "ftp://bad"}).status_code == 422
+    r = client.post("/api/replies", json={"log_id": sarah_log["log_id"], "body": "Try this.", "drill_id": drill.json()["id"]})
+    assert r.status_code == 201 and r.json()["body"] == "Try this.\nDrill: Jab + pivot exit https://example.test/jab"
+    assert client.post("/api/replies", json={"log_id": 999, "body": "x", "drill_id": 999}).status_code == 404
+    flag = client.post(f"/api/owner/checkin/{sarah_log['athlete_id']}")
+    assert flag.status_code == 201 and flag.json()["type"] == "drift"
+    assert client.post(f"/api/owner/checkin/{sarah_log['athlete_id']}").json()["id"] == flag.json()["id"]  # idempotent
+    assert client.post("/api/owner/checkin/999").status_code == 404
+    assert client.get("/api/athletes").json()[0]["flags"][0]["type"] == "drift"
+    assert client.delete(f"/api/drills/{drill.json()['id']}").status_code == 204
+
+
+def test_brief_counts_and_returning_flag(client):
+    client.post("/api/import/attendance", json=SNAPSHOT)  # Sarah attended 2026-09-28
+    roster = {"source": "manual", "athletes": [{"name": "Sarah Demo", "gymdesk_member_id": "12672454"}],
+              "bookings": [{"class_name": "Cornerwork Test — Boxing", "class_date": "2026-11-02", "status": "booked", "gymdesk_member_id": "12672454"}]}
+    assert client.post("/api/import/roster", json=roster).status_code == 200
+    brief = client.get("/api/brief/1/2026-11-02").json()
+    assert brief["counts"]["registered"] == 1 and brief["counts"]["flags"].get("returning") == 1
+    assert brief["athletes"][0]["flags"][0]["type"] == "returning" and brief["athletes"][0]["note"]
+    classes = client.get("/api/classes").json()
+    assert classes[0]["next_date"] in ("2026-11-02", None) or classes[0]["next_date"] >= "2026-09-28"
+
+
 def test_owner_summary_from_events(client, sarah_log):
     before = client.get("/api/owner/summary").json()
     assert before["coached"] == 1 and before["total_logs"] == 1 and before["unanswered_logs"] == 1 and before["reply_rate"] == 0.0

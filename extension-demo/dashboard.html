@@ -4,23 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cornerwork</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="dashboard.css?v=0.5.0">
 </head>
 <body>
-<main class="dash">
-<header class="row">
-<h1>Cornerwork</h1>
+<div class="app">
+<aside class="side">
+<div class="brand">Cornerwork</div>
+<div class="mono" id="gym-label">Coaching between classes</div>
 <nav aria-label="Views">
-<a href="#inbox" data-view="inbox">Inbox</a>
-<a href="#brief" data-view="brief">Brief</a>
+<a href="#brief" data-view="brief">Today's classes</a>
+<a href="#inbox" data-view="inbox">Inbox <span class="badge zero" id="inbox-badge">0</span></a>
+<a href="#athletes" data-view="athletes">Athletes</a>
+<a href="#drills" data-view="drills">Drill library</a>
 <a href="#owner" data-view="owner">Owner</a>
 <a href="#settings" data-view="settings">Settings</a>
 </nav>
-</header>
+<div class="foot" id="foot">Attendance imported from Gymdesk on demand</div>
+</aside>
+<main class="main">
 <div id="stale" class="notice" hidden></div>
 <div id="view" aria-live="polite"><p class="muted">Loading…</p></div>
 <p id="status" role="status"></p>
 </main>
-<script type="module" src="dashboard.js?v=0.4.0"></script>
+</div>
+<script type="module" src="dashboard.js?v=0.5.0"></script>
 </body>
 </html>
