@@ -7,6 +7,13 @@ Docs: `docs/08-agent-handoff.md` (decisions), `docs/07-implementation-plan.md` (
 ## Run the backend
 
 ```powershell
+.\start.ps1            # frees port 8765, creates .venv/.env if missing, starts the backend, prints + copies the token, opens the dashboard
+.\start.ps1 -Stop      # stop it
+```
+
+Manual equivalent:
+
+```powershell
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 copy .env.example .env      # fill in keys; leave blank for offline fakes
 .venv\Scripts\python.exe -m app.main          # http://127.0.0.1:8765  (set PORT to change)
