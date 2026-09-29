@@ -31,6 +31,7 @@ Components never touch `chrome.*`. `adapter.js` picks `adapter.extension.js` (ru
 - `node test-core.cjs`, `node test-gymdesk.cjs`: fixture state machine and reader validation.
 - `node test-background.cjs`: worker routing, config validation, backend proxy (auth header, body, error mapping), snapshot POST, toolbar click. Chrome APIs are mocked; this does not prove installed-Chrome behaviour.
 - Verified in a browser via `/c/<token>`: inbox, reply, brief, owner, stale bar with the backend down.
-- **Not yet verified in installed Chrome after v0.4:** toolbar > dashboard tab, Settings > Save and test, floating panel on Gymdesk, side panel. Gymdesk's frame policy for the iframe is unchanged from v0.3 (same injection mechanism), but confirm it.
+- **Verified in the owner's installed Chrome (2026-09-28):** Settings > Save and test; the floating panel on Sarah's attendance page rendering live owner numbers; the **Cornerwork tab** in the member sub-nav swapping in the full inbox with click-in athlete names. Gymdesk sets `<base href>`, so hashes are set against the full path; the tab's iframe lives in a closed shadow root (an extension iframe in the light DOM was dropped).
+- Not yet verified: Chrome side panel container; schedule pages opening the brief.
 
 Chrome permission reference: https://developer.chrome.com/docs/extensions/develop/concepts/activeTab
