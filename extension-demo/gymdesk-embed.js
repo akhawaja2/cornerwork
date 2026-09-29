@@ -18,15 +18,16 @@ if(subnav){
  const main=subnav.closest('div.main')||subnav.parentElement.parentElement;
  const section=document.createElement('div');section.className='profile-section';section.id='cornerwork-section';section.hidden=true;
  section.style.cssText='width:min(1100px,100%);min-height:calc(100vh - 180px)';
- const frame=document.createElement('iframe');frame.title='Cornerwork';frame.style.cssText='width:100%;height:calc(100vh - 180px);border:0;background:#f4f3ed;border-radius:12px';
- section.append(frame);main.append(section);
+ // The iframe lives in a closed shadow root, like the floating panel: Gymdesk scripts strip iframes from the light DOM.
+ const frame=document.createElement('iframe');frame.title='Cornerwork';frame.style.cssText='width:100%;height:calc(100vh - 180px);border:0;background:#f4f3ed;border-radius:12px;display:block';
+ section.attachShadow({mode:'closed'}).append(frame);main.append(section);
  const others=[...main.children].filter(c=>c!==section&&!c.classList.contains('subnav'));
  function show(on){
   if(on&&!frame.src)frame.src=dashboard+'#'+view; // everyone; click an athlete name inside to narrow
   others.forEach(c=>c.style.display=on?'none':'');section.hidden=!on;
   subnav.querySelectorAll('a').forEach(a=>a.classList.toggle('selected',on?a===tab:a.getAttribute('href')?.includes('/'+location.pathname.split('/')[3]+'/')));
  }
- tab.onclick=e=>{e.preventDefault();history.replaceState(null,'','#cornerwork');show(true);};
+ tab.onclick=e=>{e.preventDefault();history.replaceState(null,'',location.pathname+location.search+'#cornerwork');show(true);}; // full path: Gymdesk sets <base href>, so a bare '#hash' would resolve to the site root
  subnav.querySelectorAll('a:not(#cornerwork-tab)').forEach(a=>a.addEventListener('click',()=>show(false)));
  if(location.hash==='#cornerwork')show(true);
 }
