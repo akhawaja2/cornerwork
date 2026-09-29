@@ -36,6 +36,14 @@ def test_inbox_shows_log_then_reply(client, sarah_log):
     assert log["reply"]["body"] == "Thanks!" and log["athlete"]["name"] == "Sarah Demo"
 
 
+def test_inbox_scoped_to_gymdesk_member(client, sarah_log):
+    scoped = client.get("/api/inbox?member=12672454").json()
+    assert scoped["athlete"]["name"] == "Sarah Demo" and len(scoped["logs"]) == 1
+    unknown = client.get("/api/inbox?member=999").json()
+    assert unknown["athlete"] is None and unknown["logs"] == []
+    assert "athlete" not in client.get("/api/inbox").json()
+
+
 def test_reply_rejects_duplicate_and_unknown_log(client, sarah_log):
     assert client.post("/api/replies", json={"log_id": sarah_log["log_id"], "body": " "}).status_code == 422
     assert client.post("/api/replies", json={"log_id": 999, "body": "x"}).status_code == 404

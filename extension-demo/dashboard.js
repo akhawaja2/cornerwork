@@ -20,8 +20,13 @@ try {
 const state = { view: 'inbox', brief: { classId: null, date: localToday() } };
 const ctx = { adapter, brief: state.brief, refresh: () => show(), notify: msg => { $('#status').textContent = msg; } };
 
+const hashParams = () => new URLSearchParams((location.hash.split('?')[1] || ''));
+
 async function fetchView(view) {
-  if (view === 'inbox') return adapter.api('GET', '/api/inbox');
+  if (view === 'inbox') {
+    const member = hashParams().get('member');  // Gymdesk member id when opened from a member page
+    return adapter.api('GET', '/api/inbox' + (member ? '?member=' + encodeURIComponent(member) : ''));
+  }
   if (view === 'owner') return adapter.api('GET', '/api/owner/summary');
   const classes = await adapter.api('GET', '/api/classes');
   const cls = classes.find(c => c.id === state.brief.classId) || classes[0];

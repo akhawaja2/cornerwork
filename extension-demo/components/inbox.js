@@ -1,9 +1,11 @@
 import { esc, when } from './util.js';
 
-export function renderInbox(root, { logs }, ctx) {
+export function renderInbox(root, { logs, athlete }, ctx) {
   const open = logs.filter(l => !l.reply).length;
-  root.innerHTML = `<h2>${open} awaiting reply</h2>` +
-    (logs.length ? logs.map(card).join('') : '<p class="card">No logs yet. Athletes text the gym number after class; their logs appear here.</p>');
+  const scope = athlete === null ? '<p class="notice">This Gymdesk member is not in Cornerwork yet. Import their attendance from Settings, or wait for them to text JOIN.</p>'
+    : athlete ? `<p class="muted">${esc(athlete.name)} · ${esc(athlete.status)} · <a href="#inbox">all athletes</a></p>` : '';
+  root.innerHTML = `<h2>${open} awaiting reply</h2>` + scope +
+    (logs.length ? logs.map(card).join('') : athlete === null ? '' : '<p class="card">No logs yet. Athletes text the gym number after class; their logs appear here.</p>');
   root.querySelectorAll('form[data-log]').forEach(form => form.onsubmit = async e => {
     e.preventDefault();
     const button = form.querySelector('button');
