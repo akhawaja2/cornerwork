@@ -45,24 +45,16 @@ chrome.action.onClicked.addListener(async tab => {
 let work=Promise.resolve();
 chrome.runtime.onMessage.addListener((message,sender,respond) => {
  if(sender.id!==chrome.runtime.id||!sender.url?.startsWith('chrome-extension://'+chrome.runtime.id+'/'))return;
- if(!['readGymdesk','coachState','coachReply','api','getConfig','setConfig'].includes(message?.type))return;
+ if(!['readGymdesk','api','getConfig','setConfig'].includes(message?.type))return;
  work=work.catch(()=>{}).then(async()=>{
  if(message.type==='readGymdesk'){
  const tab=sender.tab|| (await chrome.tabs.query({active:true,currentWindow:true}))[0];return reportCapture(tab);
  }
  if(message.type==='api')return {ok:true,data:await api(message.method,message.path,message.body)};
  if(message.type==='getConfig'){const c=await config();const {gymdeskSync}=await chrome.storage.local.get('gymdeskSync');return {ok:true,data:{...c,container:'extension',lastImport:gymdeskSync?.at||''}};}
- if(message.type==='setConfig'){
  const c={backendUrl:String(message.config?.backendUrl||'').trim().replace(/\/$/,''),token:String(message.config?.token||'').trim()};
  if(!/^https?:\/\/[^\s/]+$/.test(c.backendUrl))throw Error('Backend URL must look like http://127.0.0.1:8765 with no path.');
  await chrome.storage.local.set({cwConfig:c});return {ok:true,data:c};
- }
- const saved=await chrome.storage.local.get('coachingState');
- if(message.type==='coachState')return {ok:true,state:saved.coachingState||null};
- if(!saved.coachingState?.sites?.gymdeskLive)throw Error('Import attendance first.');
- const selected=saved.coachingState.provider;
- const state=CW.apply({...saved.coachingState,provider:'gymdeskLive'},'reply',{id:message.id,body:message.body});state.provider=selected;
- await chrome.storage.local.set({coachingState:state});return {ok:true};
  });
  work.then(respond,e=>respond({ok:false,error:e.message,status:e.status}));return true;
 });

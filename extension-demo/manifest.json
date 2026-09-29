@@ -38,7 +38,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "embedded.html"
+        "dashboard.html"
       ],
       "matches": [
         "https://app.gymdesk.com/*"

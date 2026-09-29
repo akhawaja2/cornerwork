@@ -20,14 +20,8 @@ const ask=(message,sender=ui)=>new Promise(resolve=>{assert.equal(events.message
  const response=await ask({type:'readGymdesk'},{id:'test',url:'chrome-extension://test/index.html'});
  assert.equal(response.ok,true);assert.equal(stored.gymdeskSnapshot,snapshot);assert.equal(calls[0].target.tabId,7);
  assert.equal(response.data.backend,null);assert.match(response.data.backendError,/token/);assert.equal(fetches.length,0);
- // Embedded quick view still works.
- stored.coachingState=require('./core.js').apply(stored.coachingState,'note',{body:'Embedded reply test'});
- const reply=await ask({type:'coachReply',id:1,body:'Review before class'},{id:'test',url:'chrome-extension://test/embedded.html'});
- assert.equal(reply.ok,true);assert.equal(stored.coachingState.sites.gymdeskLive.logs[0].reply,'Review before class');
- const duplicate=await ask({type:'coachReply',id:1,body:'Duplicate'},{id:'test',url:'chrome-extension://test/embedded.html'});
- assert.equal(duplicate.ok,false);
- const read=await ask({type:'coachState'},{id:'test',url:'chrome-extension://test/embedded.html'});
- assert.equal(read.state.sites.gymdeskLive.logs[0].body,'Embedded reply test');
+ // Legacy embedded message types are gone: unknown types are ignored, not answered.
+ assert.equal(events.message({type:'coachState'},ui,()=>{throw Error('answered a removed message type')}),undefined);
  // Config + API proxy.
  const noToken=await ask({type:'api',method:'GET',path:'/api/inbox'});
  assert.equal(noToken.ok,false);assert.equal(noToken.status,401);
