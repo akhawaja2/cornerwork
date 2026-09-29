@@ -1,50 +1,60 @@
-// Content script on https://app.gymdesk.com/manager/*.
-// 1. Member pages (/manager/members/<section>/id/<memberId>): adds a "Cornerwork" tab to Gymdesk's own sub-nav
-//    (Profile · Messaging · Attendance · ...). Clicking it swaps the page section for the dashboard bundle (all
-//    athletes; athlete names inside narrow the view). Gymdesk's other tabs keep working as normal links.
-// 2. Every manager page: a floating Cornerwork button that opens the same bundle in a small panel.
-// Reads nothing from Gymdesk here and never modifies Gymdesk records.
+// Content script on https://app.gymdesk.com/manager/*. Mirrors Gymdesk's own hierarchy:
+//   1. Left rail item "Cornerwork" (beside Dashboard, Members, Gym...) -> the whole app in the content area.
+//   2. Member page tab "Cornerwork" (beside Profile, Messaging, Attendance) -> that one member's coaching page.
+// Both swap Gymdesk's content for an iframe of dashboard.html kept inside a closed shadow root (an extension iframe in the
+// light DOM gets dropped). Gymdesk's own links keep working as normal navigations. Nothing here reads or writes Gymdesk data.
 (() => {
-if(document.querySelector('#cornerwork-embedded'))return;
+if(document.querySelector('#cornerwork-rail'))return;
 const dashboard=chrome.runtime.getURL('dashboard.html');
 const member=/\/manager\/members\/[^/]+\/id\/(\d+)/.exec(location.pathname)?.[1];
-const view=location.pathname.includes('/schedule')?'brief':'inbox';
+const path=location.pathname+location.search;
+const ICON='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 21" fill="none" stroke="#eae6df" stroke-width="2.2" stroke-linecap="round"><path d="M15.5 6.2A6.5 6.5 0 1 0 15.5 14.8"/><path d="M6.5 10.5h5"/></svg>');
 
-// --- 1. Cornerwork tab in the member sub-nav --------------------------------------------------------
+function frameSection(hash,height){
+ const section=document.createElement('div');section.id='cornerwork-section';section.style.cssText='width:100%;padding:0';
+ const frame=document.createElement('iframe');frame.title='Cornerwork';frame.src=dashboard+'#'+hash;
+ frame.style.cssText='width:100%;height:'+height+';border:0;background:#f4f1ea;display:block';
+ section.attachShadow({mode:'closed'}).append(frame);return section;
+}
+
+// --- 1. Left rail: the whole app --------------------------------------------------------------------
+const rail=document.querySelector('#menu ul');
+const body=document.querySelector('#body');
+let appSection=null;
+if(rail&&body){
+ const li=document.createElement('li');const a=document.createElement('a');
+ a.id='cornerwork-rail';a.className='cornerwork';a.href='#cornerwork';a.textContent='Cornerwork';
+ a.style.cssText='background-image:url("'+ICON+'");background-repeat:no-repeat;background-position:50% 11px;background-size:20px 21px';
+ li.append(a);
+ const anchor=rail.querySelector('a.settings')?.parentElement;anchor?rail.insertBefore(li,anchor):rail.append(li);
+ function openApp(){
+  if(!appSection){appSection=frameSection('brief','calc(100vh - 8px)');body.append(appSection);}
+  [...body.children].forEach(c=>{if(c!==appSection)c.style.display='none';});
+  rail.querySelectorAll('a.selected').forEach(x=>x.classList.remove('selected'));a.classList.add('selected');
+  history.replaceState(null,'',path+'#cornerwork');
+ }
+ a.onclick=e=>{e.preventDefault();openApp();};
+ chrome.runtime.onMessage.addListener(message=>{if(message.type==='openCornerwork'&&!member)openApp();});
+ if(location.hash==='#cornerwork'&&!member)openApp();
+}
+
+// --- 2. Member page tab: one person -------------------------------------------------------------------
 const subnav=member&&document.querySelector('div.subnav ul');
 if(subnav){
  const li=document.createElement('li');const tab=document.createElement('a');
  tab.href='#cornerwork';tab.textContent='Cornerwork';tab.id='cornerwork-tab';li.append(tab);subnav.append(li);
  const main=subnav.closest('div.main')||subnav.parentElement.parentElement;
- const section=document.createElement('div');section.className='profile-section';section.id='cornerwork-section';section.hidden=true;
- section.style.cssText='width:min(1100px,100%);min-height:calc(100vh - 180px)';
- // The iframe lives in a closed shadow root, like the floating panel: Gymdesk scripts strip iframes from the light DOM.
- const frame=document.createElement('iframe');frame.title='Cornerwork';frame.style.cssText='width:100%;height:calc(100vh - 180px);border:0;background:#f4f3ed;border-radius:12px;display:block';
- section.attachShadow({mode:'closed'}).append(frame);main.append(section);
- const others=[...main.children].filter(c=>c!==section&&!c.classList.contains('subnav'));
+ let section=null;
  function show(on){
-  if(on&&!frame.src)frame.src=dashboard+'#'+view; // everyone; click an athlete name inside to narrow
-  others.forEach(c=>c.style.display=on?'none':'');section.hidden=!on;
-  subnav.querySelectorAll('a').forEach(a=>a.classList.toggle('selected',on?a===tab:a.getAttribute('href')?.includes('/'+location.pathname.split('/')[3]+'/')));
+  if(on&&!section){section=frameSection('member?member='+member,'calc(100vh - 180px)');section.className='profile-section';section.style.width='min(1100px,100%)';main.append(section);}
+  [...main.children].forEach(c=>{if(c!==section&&!c.classList.contains('subnav'))c.style.display=on?'none':'';});
+  if(section)section.hidden=!on;
+  subnav.querySelectorAll('a').forEach(x=>x.classList.toggle('selected',on?x===tab:x.getAttribute('href')?.includes('/'+location.pathname.split('/')[3]+'/')));
+  if(on)history.replaceState(null,'',path+'#cornerwork');
  }
- tab.onclick=e=>{e.preventDefault();history.replaceState(null,'',location.pathname+location.search+'#cornerwork');show(true);}; // full path: Gymdesk sets <base href>, so a bare '#hash' would resolve to the site root
- subnav.querySelectorAll('a:not(#cornerwork-tab)').forEach(a=>a.addEventListener('click',()=>show(false)));
+ tab.onclick=e=>{e.preventDefault();show(true);};
+ subnav.querySelectorAll('a:not(#cornerwork-tab)').forEach(x=>x.addEventListener('click',()=>show(false)));
+ chrome.runtime.onMessage.addListener(message=>{if(message.type==='openCornerwork')show(true);});
  if(location.hash==='#cornerwork')show(true);
 }
-
-// --- 2. Floating panel ---------------------------------------------------------------------------
-const host=document.createElement('div');host.id='cornerwork-embedded';
-const shadow=host.attachShadow({mode:'closed'});
-const style=document.createElement('style');style.textContent=`:host{all:initial}button{position:fixed;right:24px;bottom:24px;z-index:2147483646;background:#234d40;color:white;border:0;border-radius:24px;padding:14px 22px;font:600 15px system-ui;cursor:pointer;box-shadow:0 3px 16px #0003}section{position:fixed;right:24px;bottom:80px;width:min(460px,calc(100vw - 32px));height:min(760px,calc(100vh - 110px));z-index:2147483646;background:#f4f3ed;border:1px solid #cbd5c7;border-radius:14px;box-shadow:0 6px 32px #0004;overflow:hidden}section[hidden]{display:none}iframe{width:100%;height:100%;border:0}`;
-const toggle=document.createElement('button');toggle.textContent='Cornerwork';toggle.setAttribute('aria-expanded','false');
-const section=document.createElement('section');section.hidden=true;section.setAttribute('aria-label','Cornerwork coaching');
-const frame=document.createElement('iframe');frame.title='Cornerwork coaching';
-section.append(frame);shadow.append(style,toggle,section);document.body.append(host);
-function open(value){
- if(value&&!frame.src)frame.src=dashboard+'#'+view; // load the bundle on first open only
- section.hidden=!value;toggle.setAttribute('aria-expanded',String(value));toggle.textContent=value?'Close Cornerwork':'Cornerwork';
-}
-toggle.onclick=()=>open(section.hidden);
-shadow.addEventListener('keydown',e=>{if(e.key==='Escape'){open(false);toggle.focus();}});
-chrome.runtime.onMessage.addListener(message=>{if(message.type==='openCornerwork')open(true);});
 })();

@@ -105,6 +105,17 @@ def test_athletes_drills_and_checkin(client, sarah_log):
     assert client.delete(f"/api/drills/{drill.json()['id']}").status_code == 204
 
 
+def test_member_profile(client, sarah_log):
+    client.post("/api/import/attendance", json=SNAPSHOT)
+    client.post("/api/replies", json={"log_id": sarah_log["log_id"], "body": "Thanks!"})
+    p = client.get("/api/members/12672454").json()
+    assert p["athlete"]["name"] == "Sarah Demo" and p["stats"]["coach_notes"] == 1 and p["stats"]["streak_weeks"] == 1
+    assert p["sessions"][0]["class"] == "Cornerwork Test — Boxing" and p["sessions"][0]["date"] == "2026-09-28"
+    assert p["thread"][0]["reply"]["body"] == "Thanks!" and p["recap"]["logs"] == 1 and p["recap"]["coach_note"] == "Thanks!"
+    assert client.get(f"/api/athletes/{sarah_log['athlete_id']}").json()["athlete"]["id"] == sarah_log["athlete_id"]
+    assert client.get("/api/members/999").status_code == 404 and client.get("/api/athletes/999").status_code == 404
+
+
 def test_brief_counts_and_returning_flag(client):
     client.post("/api/import/attendance", json=SNAPSHOT)  # Sarah attended 2026-09-28
     roster = {"source": "manual", "athletes": [{"name": "Sarah Demo", "gymdesk_member_id": "12672454"}],

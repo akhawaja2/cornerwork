@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 from app.db import get_session
 from app.deps import current_gym
 from app.events import record
-from app.models import Athlete, Flag, Gym, Log, utcnow
+from app.models import Athlete, Consent, Event, Flag, Gym, GymClass, Log, Reply, utcnow
 from app.slices.roster.service import Snapshot, find_athlete, import_snapshot, upsert_athlete, upsert_booking, upsert_class
 
 router = APIRouter(prefix="/api")
@@ -28,6 +28,65 @@ def list_athletes(session: Session = Depends(get_session), gym: Gym = Depends(cu
                     "last_log_at": logs[0] if logs else None, "logs_7d": sum(t >= week for t in logs), "logs_total": len(logs),
                     "flags": [{"type": f.type, "detail": f.detail} for f in flags]})
     return out
+
+
+def profile(session: Session, gym: Gym, athlete: Athlete) -> dict:
+    """One athlete for the member page: stats from events, open flags, what they are working on, the coaching thread."""
+    now = utcnow()
+    month, week = now - timedelta(days=30), now - timedelta(days=7)
+    events = session.exec(select(Event).where(Event.athlete_id == athlete.id).order_by(Event.at.desc())).all()
+    checkins = [e for e in events if e.type == "check_in"]
+    logs = session.exec(select(Log).where(Log.athlete_id == athlete.id).order_by(Log.created_at.desc())).all()
+    replies = {r.log_id: r for r in session.exec(select(Reply).where(Reply.log_id.in_([l.id for l in logs]))).all()} if logs else {}
+    class_names = {c.id: c.name for c in session.exec(select(GymClass).where(GymClass.gym_id == gym.id)).all()}
+    # logging streak: consecutive 7-day windows ending now with at least one log
+    streak = 0
+    while any(now - timedelta(days=7 * (streak + 1)) < l.created_at <= now - timedelta(days=7 * streak) for l in logs):
+        streak += 1
+    techniques = {}
+    for l in logs:
+        if l.created_at >= month:
+            for t in l.techniques or []:
+                techniques.setdefault(t, {"name": t, "count": 0, "first": l.created_at, "last": l.created_at})
+                techniques[t]["count"] += 1
+                techniques[t]["first"] = min(techniques[t]["first"], l.created_at)
+    working_on = sorted(techniques.values(), key=lambda t: (-t["count"], t["name"]))[:6]
+    for t in working_on:
+        t["status"] = "new" if t["first"] >= week else f"{max(1, (now - t['first']).days // 7)} wks"
+    week_logs = [l for l in logs if l.created_at >= week]
+    last_reply = next((replies[l.id] for l in logs if l.id in replies), None)
+    consent = session.exec(select(Consent).where(Consent.athlete_id == athlete.id).order_by(Consent.received_at.desc())).first()
+    return {
+        "athlete": {"id": athlete.id, "name": athlete.name, "status": athlete.status, "goal": athlete.goal, "gymdesk_member_id": athlete.gymdesk_member_id,
+                    "phone_last4": athlete.phone[-4:] if athlete.phone else None, "membership_start": athlete.membership_start},
+        "consent": consent and {"action": consent.action, "at": consent.received_at},
+        "stats": {"sessions_30d": sum(e.at >= month for e in checkins), "streak_weeks": streak, "coach_notes": len(replies),
+                  "logs_30d": sum(l.created_at >= month for l in logs)},
+        "recap": {"logs": len(week_logs), "focus": working_on[0]["name"] if working_on else None,
+                  "coach_note": last_reply.body if last_reply else None, "coach_note_at": last_reply.sent_at if last_reply else None},
+        "working_on": working_on,
+        "flags": [{"id": f.id, "type": f.type, "source": f.source, "detail": f.detail, "opened_at": f.opened_at}
+                  for f in session.exec(select(Flag).where(Flag.athlete_id == athlete.id, Flag.resolved_at == None)).all()],
+        "sessions": [{"at": e.at, "date": e.meta.get("date"), "class": class_names.get(e.meta.get("class_id"), "Class")} for e in checkins[:6]],
+        "thread": [{**l.model_dump(), "reply": replies.get(l.id)} for l in logs],
+    }
+
+
+@router.get("/athletes/{athlete_id}")
+def athlete_profile(athlete_id: int, session: Session = Depends(get_session), gym: Gym = Depends(current_gym)):
+    athlete = session.get(Athlete, athlete_id)
+    if not athlete or athlete.gym_id != gym.id:
+        raise HTTPException(404, "Athlete not found.")
+    return profile(session, gym, athlete)
+
+
+@router.get("/members/{gymdesk_member_id}")
+def member_profile(gymdesk_member_id: str, session: Session = Depends(get_session), gym: Gym = Depends(current_gym)):
+    """Profile by Gymdesk member id; 404 means this Gymdesk member is not in Cornerwork yet."""
+    athlete = session.exec(select(Athlete).where(Athlete.gym_id == gym.id, Athlete.gymdesk_member_id == gymdesk_member_id)).first()
+    if not athlete:
+        raise HTTPException(404, "This Gymdesk member is not in Cornerwork yet.")
+    return profile(session, gym, athlete)
 
 
 @router.post("/import/attendance")

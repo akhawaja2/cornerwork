@@ -4,11 +4,12 @@ import { renderBrief } from './components/brief.js';
 import { renderOwner } from './components/owner.js';
 import { renderAthletes } from './components/athletes.js';
 import { renderDrills } from './components/drills.js';
+import { renderMember } from './components/member.js';
 import { renderSettings } from './components/settings.js';
 import { esc, ago } from './components/util.js';
 
 const $ = s => document.querySelector(s);
-const VIEWS = ['brief', 'inbox', 'athletes', 'drills', 'owner', 'settings'];
+const VIEWS = ['brief', 'inbox', 'athletes', 'drills', 'owner', 'settings', 'member'];
 
 let adapter;
 try {
@@ -32,6 +33,11 @@ async function fetchView(view) {
   if (view === 'owner') return adapter.api('GET', '/api/owner/summary');
   if (view === 'athletes') return adapter.api('GET', '/api/athletes');
   if (view === 'drills') return adapter.api('GET', '/api/drills');
+  if (view === 'member') {  // #member?member=<gymdesk id> (Gymdesk member page) or #member?athlete=<id>
+    const p = hashParams();
+    const path = p.get('athlete') ? `/api/athletes/${encodeURIComponent(p.get('athlete'))}` : `/api/members/${encodeURIComponent(p.get('member') || '')}`;
+    try { return await adapter.api('GET', path); } catch (e) { if (e.status === 404) return null; throw e; }
+  }
   const classes = await adapter.api('GET', '/api/classes');
   const cls = classes.find(c => c.id === state.brief.classId) || classes[0];
   if (!cls) return { classes, brief: null };
@@ -42,7 +48,7 @@ async function fetchView(view) {
 const localToday = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 
 function render(root, data) {
-  ({ inbox: renderInbox, brief: renderBrief, owner: renderOwner, athletes: renderAthletes, drills: renderDrills })[state.view](root, data, ctx);
+  ({ inbox: renderInbox, brief: renderBrief, owner: renderOwner, athletes: renderAthletes, drills: renderDrills, member: renderMember })[state.view](root, data, ctx);
 }
 
 async function refreshBadge(data) {
@@ -58,6 +64,7 @@ async function refreshBadge(data) {
 async function show() {
   const view = (location.hash.slice(1) || 'inbox').split('?')[0];
   state.view = VIEWS.includes(view) ? view : 'inbox';
+  document.body.classList.toggle('solo', state.view === 'member');  // member page: one person, no app chrome
   document.querySelectorAll('nav a').forEach(a => a.setAttribute('aria-current', a.dataset.view === state.view ? 'page' : 'false'));
   const root = $('#view'), stale = $('#stale');
   stale.hidden = true;

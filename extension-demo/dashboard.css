@@ -64,6 +64,7 @@ label{display:block;font-weight:600;margin:10px 0 5px}
 #stale{margin-bottom:12px}
 #status{min-height:22px;font-size:13px;color:#345e4c;margin-top:8px}
 [hidden]{display:none!important}
+body.solo .app{grid-template-columns:1fr}body.solo .side{display:none}body.solo .main{padding:20px 24px}
 @media (max-width:820px){
  .app{grid-template-columns:1fr}
  .side{flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px 14px;gap:8px}
